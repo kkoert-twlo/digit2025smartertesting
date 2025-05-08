@@ -1,5 +1,9 @@
 package schema;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import view.Views.AnalyticsDataView;
@@ -3415,5 +3419,7 @@ public class Schema {
         Integer field50;
     }
 
-    // Map<String, List<Map<Integer, Set<String>>>> intentionallyConvolutedField;
+    /// [Journey#DemoSchemaAddition]
+    //@JsonProperty
+    //Map<String, List<Map<Integer, Set<String>>>> intentionallyConvolutedField;
 }

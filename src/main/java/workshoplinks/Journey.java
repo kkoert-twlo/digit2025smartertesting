@@ -21,6 +21,7 @@ public enum Journey {
 
     // 1. Generating test data
     InstancioInANutshell,
+    DemoSchemaAddition,
     BackToSchemaDemo,
 
     // 2. "Millibenchmarking" (TM)
