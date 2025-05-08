@@ -77,7 +77,6 @@ public class TestUtils {
     public static Schema newUniqueSchemaData() {
         final var oneTimeUseModel = Instancio.of(Schema.class)
                 .withSeed(0)
-                .withNullable(fields())
                 .withSetting(Keys.ON_SET_FIELD_ERROR, OnSetFieldError.FAIL)
                 .withSetting(Keys.FAIL_ON_ERROR, true)
                 .withMaxDepth(20)

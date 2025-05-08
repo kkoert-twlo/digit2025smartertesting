@@ -28,11 +28,11 @@ import view.Views.OperationalDataView;
 /// @see workshoplinks.Guidance#SnapshotTestingInANutshell
 @EnableSnapshotTests
 @SnapshotTestOptions(diffFormat = DiffFormat.SPLIT)
-/// The test starts failing and gives us a diff of the changes.
-/// If we intended for the changes to happen, we can update snapshots with the ForceUpdateSnapshots annotation.
-///
-/// @see workshoplinks.Guidance#DemoSnapshotTestDevLoop2
-//@de.skuzzle.test.snapshots.ForceUpdateSnapshots
+        /// The test starts failing and gives us a diff of the changes.
+        /// If we intended for the changes to happen, we can update snapshots with the ForceUpdateSnapshots annotation.
+        ///
+        /// @see workshoplinks.Guidance#DemoSnapshotTestDevLoop2
+        //@de.skuzzle.test.snapshots.ForceUpdateSnapshots
 class ViewFilteringTest {
     ViewFiltering viewFiltering = new ViewFiltering();
 

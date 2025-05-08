@@ -59,15 +59,14 @@ public class Application {
         public Schema process(final @RequestBody Schema data) {
             try {
                 final var analyticsData = Operations.asView(data, Views.AnalyticsDataView.class);
-                final var processingData1 = Operations.asView(data, Views.ProcessingDataView1.class);
-                final var processingData2 = Operations.asView(data, Views.ProcessingDataView2.class);
-                final var processingData3 = Operations.asView(data, Views.ProcessingDataView3.class);
-                final var operationalData = Operations.asView(data, Views.OperationalDataView.class);
-
                 handleAnalyticsData(analyticsData); // network call into another service
+                final var processingData1 = Operations.asView(data, Views.ProcessingDataView1.class);
                 handleProcessingData1(processingData1); // local processing
+                final var processingData2 = Operations.asView(data, Views.ProcessingDataView2.class);
                 handleProcessingData2(processingData2); // local processing
+                final var processingData3 = Operations.asView(data, Views.ProcessingDataView3.class);
                 handleProcessingData3(processingData3); // local processing
+                final var operationalData = Operations.asView(data, Views.OperationalDataView.class);
                 return handleOperationalData(operationalData); // local processing
             } catch (Exception e) {
                 log.error("Error processing data", e);
