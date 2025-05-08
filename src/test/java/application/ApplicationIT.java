@@ -7,19 +7,15 @@ import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import de.skuzzle.test.snapshots.Snapshot;
 import de.skuzzle.test.snapshots.SnapshotTestOptions;
 import de.skuzzle.test.snapshots.SnapshotTestOptions.DiffFormat;
+import de.skuzzle.test.snapshots.SnapshotTestOptions.NormalizeLineEndings;
 import de.skuzzle.test.snapshots.data.json.JsonSnapshot;
 import de.skuzzle.test.snapshots.junit5.EnableSnapshotTests;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
-import org.junit.jupiter.api.parallel.Execution;
-import org.junit.jupiter.api.parallel.ExecutionMode;
 import schema.Schema;
 import utils.TestUtils;
 import workshoplinks.Guidance;
@@ -31,6 +27,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.List;
@@ -39,10 +36,8 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMoc
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@Execution(ExecutionMode.CONCURRENT)
 @EnableSnapshotTests
-@SnapshotTestOptions(diffFormat = DiffFormat.SPLIT, normalizeLineEndings = SnapshotTestOptions.NormalizeLineEndings.GIT)
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@SnapshotTestOptions(diffFormat = DiffFormat.SPLIT, normalizeLineEndings = NormalizeLineEndings.GIT)
 // Uncomment to update snapshots
 //@de.skuzzle.test.snapshots.ForceUpdateSnapshots
 public class ApplicationIT {
@@ -68,8 +63,6 @@ public class ApplicationIT {
 
     /// @see Guidance#DemoApplication
     @Test
-    @Order(2)
-    @Execution(ExecutionMode.SAME_THREAD)
     void demoApplication() {
         analyticsService.resetRequests();
         final var data = TestUtils.newSchemaData();
@@ -77,12 +70,9 @@ public class ApplicationIT {
         assertEquals(200, resp.statusCode(), "Response code was not 200");
     }
 
-    private static final int ITERATIONS = 50_000;
+    private static final int ITERATIONS = 25_000;
 
-    /// Notice that this is just the basic [#demoApplication()] test just slightly modified and:
-    /// - Run via @RepeatedTests for many loops
-    /// - Class also uses @Execution(ExecutionMode.CONCURRENT) to generate more load
-    /// - There is also a junit-platform.properties file to configure the parallelism
+    /// Notice that this is just the basic [#demoApplication()] test just slightly modified.
     ///
     /// The reason we call this a "millibenchmark" is that:
     /// - It isn't a microbenchmark really as it isn't as laser focused as a microbenchmark usually is.
@@ -91,7 +81,7 @@ public class ApplicationIT {
     ///
     /// @see Guidance#MillibenchmarkingInANutshell
     /// @see Guidance#RunMillibenchmarkAndIdentifyTheBottleneck
-    @Disabled
+    @Disabled // Makes sense to have it be opted into
     @RepeatedTest(value = ITERATIONS, name = "{displayName} {currentRepetition}/{totalRepetitions}")
     void millibenchmark() {
         final var data = TestUtils.newSchemaData();
@@ -111,8 +101,6 @@ public class ApplicationIT {
     ///
     /// @see Guidance#DemoSnapshotTestDevLoop3
     @Test
-    @Order(1)
-    @Execution(ExecutionMode.SAME_THREAD)
     @SneakyThrows
     void snapshotTest(final Snapshot snapshot) {
         analyticsService.resetRequests();
@@ -200,7 +188,7 @@ public class ApplicationIT {
                 .header("Accept", "application/json")
                 .POST(requestBody)
                 .build();
-        return testClient.send(request, HttpResponse.BodyHandlers.ofString());
+        return testClient.send(request, BodyHandlers.ofString());
     }
 
     @SneakyThrows

@@ -12,3 +12,9 @@ Specifically, it touches on:
 
 After making some recent code changes, your service has suffered a significant reduction in performance.
 You've been tasked with investigating what went wrong, fixing the issue and testing the logic!
+
+## References
+
+- Instancio https://www.instancio.org/user-guide/
+- Snapshot testing https://skuzzle.github.io/snapshot-tests/reference/latest/
+- Java Flight Recorder https://docs.oracle.com/javacomponents/jmc-5-4/jfr-runtime-guide/about.htm
