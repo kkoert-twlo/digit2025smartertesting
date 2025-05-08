@@ -18,7 +18,7 @@ import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import schema.Schema;
 import utils.TestUtils;
-import workshoplinks.Guidance;
+import workshoplinks.Journey;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -61,7 +61,7 @@ public class ApplicationIT {
         }
     }
 
-    /// @see Guidance#DemoApplication
+    /// @see Journey#DemoApplication
     @Test
     void demoApplication() {
         analyticsService.resetRequests();
@@ -79,8 +79,12 @@ public class ApplicationIT {
     /// - It isn't a load test either, it runs in a much less controlled environment in a more ad-hoc manner.
     /// So it is something between a microbenchmark and a load test.
     ///
-    /// @see Guidance#MillibenchmarkingInANutshell
-    /// @see Guidance#RunMillibenchmarkAndIdentifyTheBottleneck
+    /// @see Journey#MillibenchmarkingInANutshell
+    /// @see Journey#RunMillibenchmarkAndIdentifyTheBottleneck
+    /// Q/A: By show of hands:
+    /// - Who has microbenchmarked before?
+    /// - Who has load testing in their current services?
+    /// - Who has used a similar approach to this before?
     @Disabled // Makes sense to have it be opted into
     @RepeatedTest(value = ITERATIONS, name = "{displayName} {currentRepetition}/{totalRepetitions}")
     void millibenchmark() {
@@ -99,7 +103,7 @@ public class ApplicationIT {
     /// service. In the real world, this could be capturing requests going out to many other services and snapshotting
     /// the many details of those interactions.
     ///
-    /// @see Guidance#DemoSnapshotTestDevLoop3
+    /// @see Journey#DemoSnapshotTestDevLoop3
     @Test
     @SneakyThrows
     void snapshotTest(final Snapshot snapshot) {
@@ -123,18 +127,17 @@ public class ApplicationIT {
                 break;
             }
             if (System.currentTimeMillis() - startTime > 10_000) {
-                // This is broken because seemingly the wiremock server is unstable
                 throw new RuntimeException("Timeout waiting for analytics service to receive request");
             }
         }
 
         snapshot.named("analyticsService.analyticsStarted.request")
                 .assertThat(requestBodiesSentToAnalyticsService)
-                .as(JsonSnapshot.json(TestUtils.om))
+                .as(JsonSnapshot.json(TestUtils.omFromProd))
                 .matchesSnapshotStructure();
         snapshot.named("mainService.process.response")
                 .assertThat(this.parseToSchema(resp.body()))
-                .as(JsonSnapshot.json(TestUtils.om))
+                .as(JsonSnapshot.json(TestUtils.omFromProd))
                 .matchesSnapshotStructure();
     }
 
@@ -144,7 +147,11 @@ public class ApplicationIT {
     /// The actual point is that wherever and however, your application.jar is run, you can pass it java flight recorder
     /// parameters to collect profiling information.
     ///
-    /// @see Guidance#JavaFlightRecorderInANutshell
+    /// @see Journey#JavaFlightRecorderInANutshell
+    /// Q/A: By show of hands:
+    /// - Who has used Java Flight Recorder before?
+    /// - Who has used other profiling tools before?
+    /// - Who has used profiling in production before?
     @SneakyThrows
     private static Process startMainServiceInSeparateJVM() {
         // NOTE: Assumes a compatible java version is on your system path (17+)
@@ -193,7 +200,7 @@ public class ApplicationIT {
 
     @SneakyThrows
     private Schema parseToSchema(final String body) {
-        return TestUtils.om.readValue(body, Schema.class);
+        return TestUtils.omFromProd.readValue(body, Schema.class);
     }
 
     private static WireMockServer startAnalyticsService() {

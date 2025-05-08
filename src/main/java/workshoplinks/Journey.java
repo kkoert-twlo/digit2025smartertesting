@@ -1,6 +1,6 @@
 package workshoplinks;
 
-public enum Guidance {
+public enum Journey {
     // Intros/Demos
     IntroToApplication,
     DemoApplication,
@@ -35,8 +35,13 @@ public enum Guidance {
     DemoSnapshotTestDevLoop3,
     DemoSnapshotTestDevLoop4,
 
-    // Extra credit
+    // Q/A round or Story time
 
-    // Maybe if we switched the serializer library we could get even better performance?
-    ExtraCreditCouldWeUseAMoreOptimizedSerializer,
+    // Questions/Stories:
+    // - Where would you use snapshot testing?
+    //   - Who has the service with the highest number of integration to other services?
+    // - Where would you use Instancio (or similar)?
+    //   - Who has operations that have to run over large data structures with nullable data?
+    // - How would you optimize the current millibenchmark for better load generation?
+    // - The Twilio story with a large schema, reflection logic, code generation and snapshot testing.
 }

@@ -5,10 +5,9 @@ import java.lang.reflect.Field;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import workshoplinks.Guidance;
-import workshoplinks.Solutions;
+import workshoplinks.Journey;
 
-/// @see Guidance#IntroToViewFiltering
+/// @see Journey#IntroToViewFiltering
 @Slf4j
 public class ViewFiltering {
 

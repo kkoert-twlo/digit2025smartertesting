@@ -5,9 +5,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import workshoplinks.Guidance;
+import workshoplinks.Journey;
 
-/// @see Guidance#IntroToViewFiltering
+/// @see Journey#IntroToViewFiltering
 public interface Views {
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.FIELD})

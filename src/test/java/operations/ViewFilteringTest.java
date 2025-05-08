@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import utils.TestUtils;
 import view.Views.AnalyticsDataView;
 import view.Views.OperationalDataView;
+import workshoplinks.Journey;
 
 /// Snapshot testing is sort of the inverse of Instancio.
 /// - Instancio generates test data.
@@ -25,18 +26,21 @@ import view.Views.OperationalDataView;
 ///
 /// BONUS: it is ergonomic to work with!
 ///
-/// @see workshoplinks.Guidance#SnapshotTestingInANutshell
+/// @see Journey#SnapshotTestingInANutshell
+/// Q/A: By show of hands:
+/// - Who has used frontend oriented snapshot testing before?
+/// - Who has used backend oriented snapshot testing before?
 @EnableSnapshotTests
 @SnapshotTestOptions(diffFormat = DiffFormat.SPLIT, normalizeLineEndings = SnapshotTestOptions.NormalizeLineEndings.GIT)
         /// The test starts failing and gives us a diff of the changes.
         /// If we intended for the changes to happen, we can update snapshots with the ForceUpdateSnapshots annotation.
         ///
-        /// @see workshoplinks.Guidance#DemoSnapshotTestDevLoop2
+        /// @see Journey#DemoSnapshotTestDevLoop2
         //@de.skuzzle.test.snapshots.ForceUpdateSnapshots
 class ViewFilteringTest {
     ViewFiltering viewFiltering = new ViewFiltering();
 
-    /// @see workshoplinks.Guidance#DemoViewFiltering
+    /// @see Journey#DemoViewFiltering
     @Test
     @SneakyThrows
     void demoViewFiltering(final Snapshot snapshot) {
@@ -46,17 +50,17 @@ class ViewFilteringTest {
 
         snapshot.named("demoViewFiltering.initialData")
                 .assertThat(initialData)
-                .as(JsonSnapshot.json())
+                .as(JsonSnapshot.json(TestUtils.omWithoutNulls))
                 .matchesSnapshotStructure();
 
         snapshot.named("demoViewFiltering.analyticsViewData")
                 .assertThat(analyticsViewData)
-                .as(JsonSnapshot.json())
+                .as(JsonSnapshot.json(TestUtils.omWithoutNulls))
                 .matchesSnapshotStructure();
 
         snapshot.named("demoViewFiltering.operationalViewData")
                 .assertThat(operationalViewData)
-                .as(JsonSnapshot.json())
+                .as(JsonSnapshot.json(TestUtils.omWithoutNulls))
                 .matchesSnapshotStructure();
     }
 }

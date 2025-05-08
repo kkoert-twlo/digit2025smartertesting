@@ -7,9 +7,9 @@ import view.Views.OperationalDataView;
 import view.Views.ProcessingDataView1;
 import view.Views.ProcessingDataView2;
 import view.Views.ProcessingDataView3;
-import workshoplinks.Guidance;
+import workshoplinks.Journey;
 
-/// @see Guidance#IntroToSchema
+/// @see Journey#IntroToSchema
 @Data
 public class Schema {
     @JsonProperty
@@ -747,7 +747,7 @@ public class Schema {
 
         /// Let's remove the View here, which changes a field somewhere deep in the Schema.
         ///
-        /// @see Guidance#DemoSnapshotTestDevLoop1
+        /// @see Journey#DemoSnapshotTestDevLoop1
         @AnalyticsDataView
         @JsonProperty
         Integer field7;

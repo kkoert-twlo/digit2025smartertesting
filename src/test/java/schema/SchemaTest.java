@@ -3,11 +3,11 @@ package schema;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import utils.TestUtils;
-import workshoplinks.Guidance;
+import workshoplinks.Journey;
 
 class SchemaTest {
-    /// @see Guidance#DemoSchema
-    /// @see Guidance#BackToSchemaDemo
+    /// @see Journey#DemoSchema
+    /// @see Journey#BackToSchemaDemo
     @Test
     @SneakyThrows
     void demoSchema() {

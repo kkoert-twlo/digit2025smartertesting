@@ -1,17 +1,15 @@
 package utils;
 
-import application.Application;
 import application.Application.ApiController;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import org.instancio.Instancio;
 import org.instancio.Model;
 import org.instancio.settings.Keys;
 import org.instancio.settings.OnSetFieldError;
 import schema.Schema;
+import workshoplinks.Journey;
 
-import static com.fasterxml.jackson.databind.SerializationFeature.*;
 import static org.instancio.Select.fields;
 
 public class TestUtils {
@@ -52,7 +50,10 @@ public class TestUtils {
     ///             .toModel();
     ///```
     ///
-    /// @see workshoplinks.Guidance#InstancioInANutshell
+    /// @see Journey#InstancioInANutshell
+    /// Q/A: Show of hands:
+    /// - Who has used Instancio before?
+    /// - Who has used another similar data generation library?
     public static final Model<Schema> instancioModel = Instancio.of(Schema.class)
             .withSeed(0)
             .withNullable(fields())
@@ -60,11 +61,13 @@ public class TestUtils {
             .withSetting(Keys.FAIL_ON_ERROR, true)
             .withMaxDepth(20)
             .toModel();
-    public static final ObjectMapper om = ApiController.jsonMapper;
+    public static final ObjectMapper omFromProd = ApiController.jsonMapper;
+    public static final ObjectMapper omWithoutNulls =
+            omFromProd.copy().setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
     public static String toJson(Object obj) {
         try {
-            return om.writeValueAsString(obj);
+            return omFromProd.writeValueAsString(obj);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

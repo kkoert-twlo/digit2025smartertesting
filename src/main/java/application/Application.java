@@ -20,12 +20,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import schema.Schema;
 import view.Views;
-import workshoplinks.Guidance;
-import workshoplinks.Solutions;
+import workshoplinks.Journey;
 
 import static com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT;
 
-/// @see Guidance#IntroToApplication
+/// @see Journey#IntroToApplication
 @Slf4j
 @SpringBootApplication
 public class Application {
@@ -39,8 +38,7 @@ public class Application {
         /// Let's disable null inclusion to optimize payloads over the wire.
         /// Then fix snapshot tests that start failing.
         ///
-        /// @see Guidance#DemoSnapshotTestDevLoop4
-        /// @see Solutions#DisableNullSerializationOverTheWire
+        /// @see Journey#DemoSnapshotTestDevLoop4
         public static final ObjectMapper jsonMapper = JsonMapper.builder()
                 .disable(MapperFeature.AUTO_DETECT_CREATORS)
                 .disable(MapperFeature.AUTO_DETECT_FIELDS)
@@ -54,7 +52,8 @@ public class Application {
                 .header("Content-Type", "application/json")
                 .header("Accept", "application/json");
 
-        /// @see Guidance#ReiterateInTLDR
+        /// @see Journey#ReiterateInTLDR
+        /// Q/A: Any bets on where the bottleneck will be? :)
         @PostMapping("/process")
         public Schema process(final @RequestBody Schema data) {
             try {
@@ -76,8 +75,6 @@ public class Application {
 
         @SneakyThrows
         private void handleAnalyticsData(final Schema analyticsData) {
-            /// [Guidance#ExtraCreditCouldWeUseAMoreOptimizedSerializer]
-            /// [Solutions#ExtraCreditCouldWeUseAMoreOptimizedSerializer]
             final var body = BodyPublishers.ofString(jsonMapper.writeValueAsString(analyticsData));
             final var request = analyticsServiceRequestBuilder.POST(body).build();
             final var response = analyticsServiceClient.send(request, HttpResponse.BodyHandlers.discarding());
