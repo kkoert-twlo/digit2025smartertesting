@@ -44,7 +44,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SnapshotTestOptions(diffFormat = DiffFormat.SPLIT, normalizeLineEndings = SnapshotTestOptions.NormalizeLineEndings.GIT)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 // Uncomment to update snapshots
-@de.skuzzle.test.snapshots.ForceUpdateSnapshots
+//@de.skuzzle.test.snapshots.ForceUpdateSnapshots
 public class ApplicationIT {
     static Process mainService;
     static WireMockServer analyticsService;
@@ -68,6 +68,8 @@ public class ApplicationIT {
 
     /// @see Guidance#DemoApplication
     @Test
+    @Order(2)
+    @Execution(ExecutionMode.SAME_THREAD)
     void demoApplication() {
         analyticsService.resetRequests();
         final var data = TestUtils.newSchemaData();
@@ -113,6 +115,7 @@ public class ApplicationIT {
     @Execution(ExecutionMode.SAME_THREAD)
     @SneakyThrows
     void snapshotTest(final Snapshot snapshot) {
+        analyticsService.resetRequests();
         final var data = TestUtils.newUniqueSchemaData();
         final var resp = callMainServiceWithData(data);
         assertEquals(200, resp.statusCode(), "Response code was not 200");
@@ -132,6 +135,7 @@ public class ApplicationIT {
                 break;
             }
             if (System.currentTimeMillis() - startTime > 10_000) {
+                // This is broken because seemingly the wiremock server is unstable
                 throw new RuntimeException("Timeout waiting for analytics service to receive request");
             }
         }
