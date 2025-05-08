@@ -12,9 +12,11 @@ import de.skuzzle.test.snapshots.junit5.EnableSnapshotTests;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import schema.Schema;
@@ -31,14 +33,16 @@ import java.net.http.HttpResponse;
 import java.nio.file.Paths;
 import java.util.Comparator;
 
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Execution(ExecutionMode.CONCURRENT)
 @EnableSnapshotTests
 @SnapshotTestOptions(diffFormat = DiffFormat.SPLIT)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 // Uncomment to update snapshots
-@de.skuzzle.test.snapshots.ForceUpdateSnapshots
+//@de.skuzzle.test.snapshots.ForceUpdateSnapshots
 public class ApplicationIT {
     static Process mainService;
     static WireMockServer analyticsService;
@@ -47,15 +51,7 @@ public class ApplicationIT {
     @BeforeAll
     static void setUp() {
         mainService = startMainServiceInSeparateJVM();
-        analyticsService = new WireMockServer(8184);
-        analyticsService.start();
-        WireMock.configureFor("localhost", 8184);
-
-        analyticsService.stubFor(WireMock.post("/startAnalytics")
-                .willReturn(WireMock.aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody("{\"message\":\"analysisStarted\"}")));
+        analyticsService = startAnalyticsService();
     }
 
     @AfterAll
@@ -68,21 +64,16 @@ public class ApplicationIT {
         }
     }
 
-    @BeforeEach
-    void resetWireMock() {
-        analyticsService.resetRequests();
-    }
-
     /// @see Guidance#DemoApplication
     @Test
     void demoApplication() {
+        analyticsService.resetRequests();
         final var data = TestUtils.newSchemaData();
-        data.setIsOptedIntoAnalytics(true); // force interaction
         final var resp = callMainServiceWithData(data);
         assertEquals(200, resp.statusCode(), "Response code was not 200");
     }
 
-    private static final int ITERATIONS = 25_000;
+    private static final int ITERATIONS = 50_000;
 
     /// Notice that this is just the basic [#demoApplication()] test just slightly modified and:
     /// - Run via @RepeatedTests for many loops
@@ -99,7 +90,6 @@ public class ApplicationIT {
     @RepeatedTest(value = ITERATIONS, name = "{displayName} {currentRepetition}/{totalRepetitions}")
     void millibenchmark() {
         final var data = TestUtils.newSchemaData();
-        data.setIsOptedIntoAnalytics(false);
         final var resp = callMainServiceWithData(data);
         assertEquals(200, resp.statusCode(), "Response code was not 200");
     }
@@ -116,12 +106,17 @@ public class ApplicationIT {
     ///
     /// @see Guidance#DemoSnapshotTestDevLoop3
     @Test
+    @Order(1)
+    @Execution(ExecutionMode.SAME_THREAD)
     @SneakyThrows
     void snapshotTest(final Snapshot snapshot) {
+        analyticsService.resetRequests();
         final var data = TestUtils.newUniqueSchemaData();
-        data.setIsOptedIntoAnalytics(true); // force interaction with analytics service
         final var resp = callMainServiceWithData(data);
         assertEquals(200, resp.statusCode(), "Response code was not 200");
+
+        // Make sure the wiremock has the data
+        Thread.sleep(1000);
 
         final var requestBodiesSentToAnalyticsService = analyticsService.getServeEvents()
                 .getServeEvents()
@@ -183,7 +178,7 @@ public class ApplicationIT {
     private HttpResponse<String> callMainServiceWithData(final Schema schema) {
         final var requestBody = BodyPublishers.ofString(TestUtils.toJson(schema));
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8183/process"))
+                .uri(URI.create("http://localhost:8185/process"))
                 .header("Content-Type", "application/json")
                 .header("Accept", "application/json")
                 .POST(requestBody)
@@ -194,5 +189,16 @@ public class ApplicationIT {
     @SneakyThrows
     private Schema parseToSchema(final String body) {
         return TestUtils.om.readValue(body, Schema.class);
+    }
+
+    private static WireMockServer startAnalyticsService() {
+        analyticsService = new WireMockServer(wireMockConfig().port(8184)
+                .asynchronousResponseEnabled(true)
+                .containerThreads(8)
+                .maxRequestJournalEntries(1));
+        analyticsService.start();
+        WireMock.configureFor("localhost", 8184);
+        analyticsService.stubFor(WireMock.post("/startAnalytics").willReturn(WireMock.aResponse().withStatus(200)));
+        return analyticsService;
     }
 }

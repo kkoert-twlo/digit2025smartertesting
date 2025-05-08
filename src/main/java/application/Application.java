@@ -49,14 +49,25 @@ public class Application {
                 .enable(INDENT_OUTPUT) // this is just for illustrative purposes
                 .build();
         private static final HttpClient analyticsServiceClient = HttpClient.newHttpClient();
+        private static final HttpRequest.Builder analyticsServiceRequestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create("http://localhost:8184/startAnalytics"))
+                .header("Content-Type", "application/json")
+                .header("Accept", "application/json");
 
         /// @see Guidance#ReiterateInTLDR
         @PostMapping("/process")
         public Schema process(final @RequestBody Schema data) {
             try {
                 final var analyticsData = Operations.asView(data, Views.AnalyticsDataView.class);
+                final var processingData1 = Operations.asView(data, Views.ProcessingDataView1.class);
+                final var processingData2 = Operations.asView(data, Views.ProcessingDataView2.class);
+                final var processingData3 = Operations.asView(data, Views.ProcessingDataView3.class);
                 final var operationalData = Operations.asView(data, Views.OperationalDataView.class);
+
                 handleAnalyticsData(analyticsData); // network call into another service
+                handleProcessingData1(processingData1); // local processing
+                handleProcessingData2(processingData2); // local processing
+                handleProcessingData3(processingData3); // local processing
                 return handleOperationalData(operationalData); // local processing
             } catch (Exception e) {
                 log.error("Error processing data", e);
@@ -69,18 +80,37 @@ public class Application {
             /// [Guidance#ExtraCreditCouldWeUseAMoreOptimizedSerializer]
             /// [Solutions#ExtraCreditCouldWeUseAMoreOptimizedSerializer]
             final var body = BodyPublishers.ofString(jsonMapper.writeValueAsString(analyticsData));
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("http://localhost:8184/startAnalytics"))
-                    .header("Content-Type", "application/json")
-                    .header("Accept", "application/json")
-                    .POST(body)
-                    .build();
-            analyticsServiceClient.send(request, HttpResponse.BodyHandlers.ofString());
+            final var request = analyticsServiceRequestBuilder.POST(body).build();
+            analyticsServiceClient.send(request, HttpResponse.BodyHandlers.discarding());
         }
 
         private Schema handleOperationalData(final Schema operationalData) {
             // (sparkles) Imagine interesting processing here (sparkles)
+            emulateCpuLoad();
             return operationalData;
+        }
+
+        private void handleProcessingData1(final Schema processingData1) {
+            // (sparkles) Imagine interesting processing here (sparkles)
+            emulateCpuLoad();
+        }
+
+        private void handleProcessingData2(final Schema processingData2) {
+            // (sparkles) Imagine interesting processing here (sparkles)
+            emulateCpuLoad();
+        }
+
+        private void handleProcessingData3(final Schema processingData3) {
+            // (sparkles) Imagine interesting processing here (sparkles)
+            emulateCpuLoad();
+        }
+
+        private void emulateCpuLoad() {
+            double result = 0.0;
+            // Perform a CPU-intensive calculation
+            for (int i = 0; i < 1000; i++) {
+                result += Math.sqrt(i) * Math.sin(i);
+            }
         }
     }
 }
