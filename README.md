@@ -13,7 +13,7 @@ Specifically, it touches on:
 After making some recent code changes, your service has suffered a significant reduction in performance.
 You've been tasked with investigating what went wrong, fixing the issue and testing the logic!
 
-Start from `src/main/java/workshoplinks/Journey.java` and via "jump to usages in your IDE."
+Start from [Journey.java](src/main/java/workshoplinks/Journey.java) and follow along via "jump to usages" in your IDE.
 
 ## References
 
