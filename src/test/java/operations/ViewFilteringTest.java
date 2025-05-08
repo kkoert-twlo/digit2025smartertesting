@@ -27,7 +27,7 @@ import view.Views.OperationalDataView;
 ///
 /// @see workshoplinks.Guidance#SnapshotTestingInANutshell
 @EnableSnapshotTests
-@SnapshotTestOptions(diffFormat = DiffFormat.SPLIT)
+@SnapshotTestOptions(diffFormat = DiffFormat.SPLIT, normalizeLineEndings = SnapshotTestOptions.NormalizeLineEndings.GIT)
         /// The test starts failing and gives us a diff of the changes.
         /// If we intended for the changes to happen, we can update snapshots with the ForceUpdateSnapshots annotation.
         ///

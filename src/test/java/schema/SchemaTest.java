@@ -11,7 +11,7 @@ class SchemaTest {
     @Test
     @SneakyThrows
     void demoSchema() {
-        var demoInstance = TestUtils.newSchemaData();
+        var demoInstance = TestUtils.newUniqueSchemaData();
         System.out.println(TestUtils.toJson(demoInstance));
     }
 }

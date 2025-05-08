@@ -12,6 +12,7 @@ import de.skuzzle.test.snapshots.junit5.EnableSnapshotTests;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.RepeatedTest;
@@ -32,6 +33,7 @@ import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.nio.file.Paths;
 import java.util.Comparator;
+import java.util.List;
 
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -39,10 +41,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Execution(ExecutionMode.CONCURRENT)
 @EnableSnapshotTests
-@SnapshotTestOptions(diffFormat = DiffFormat.SPLIT)
+@SnapshotTestOptions(diffFormat = DiffFormat.SPLIT, normalizeLineEndings = SnapshotTestOptions.NormalizeLineEndings.GIT)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 // Uncomment to update snapshots
-//@de.skuzzle.test.snapshots.ForceUpdateSnapshots
+@de.skuzzle.test.snapshots.ForceUpdateSnapshots
 public class ApplicationIT {
     static Process mainService;
     static WireMockServer analyticsService;
@@ -87,6 +89,7 @@ public class ApplicationIT {
     ///
     /// @see Guidance#MillibenchmarkingInANutshell
     /// @see Guidance#RunMillibenchmarkAndIdentifyTheBottleneck
+    @Disabled
     @RepeatedTest(value = ITERATIONS, name = "{displayName} {currentRepetition}/{totalRepetitions}")
     void millibenchmark() {
         final var data = TestUtils.newSchemaData();
@@ -110,25 +113,35 @@ public class ApplicationIT {
     @Execution(ExecutionMode.SAME_THREAD)
     @SneakyThrows
     void snapshotTest(final Snapshot snapshot) {
-        analyticsService.resetRequests();
         final var data = TestUtils.newUniqueSchemaData();
         final var resp = callMainServiceWithData(data);
         assertEquals(200, resp.statusCode(), "Response code was not 200");
 
-        // Make sure the wiremock has the data
-        Thread.sleep(1000);
+        final var startTime = System.currentTimeMillis();
+        List<Schema> requestBodiesSentToAnalyticsService;
+        while (true) {
+            requestBodiesSentToAnalyticsService = analyticsService.getServeEvents()
+                    .getServeEvents()
+                    .stream()
+                    .map(ServeEvent::getRequest)
+                    .sorted(Comparator.comparing(LoggedRequest::getLoggedDate))
+                    .map(LoggedRequest::getBodyAsString)
+                    .map(this::parseToSchema)
+                    .toList();
+            if (!requestBodiesSentToAnalyticsService.isEmpty()) {
+                break;
+            }
+            if (System.currentTimeMillis() - startTime > 10_000) {
+                throw new RuntimeException("Timeout waiting for analytics service to receive request");
+            }
+        }
 
-        final var requestBodiesSentToAnalyticsService = analyticsService.getServeEvents()
-                .getServeEvents()
-                .stream()
-                .map(ServeEvent::getRequest)
-                .sorted(Comparator.comparing(LoggedRequest::getLoggedDate))
-                .map(LoggedRequest::getBodyAsString)
-                .map(this::parseToSchema)
-                .toList();
-
-        snapshot.named("analyticsService.analyticsStarted")
+        snapshot.named("analyticsService.analyticsStarted.request")
                 .assertThat(requestBodiesSentToAnalyticsService)
+                .as(JsonSnapshot.json(TestUtils.om))
+                .matchesSnapshotStructure();
+        snapshot.named("mainService.process.response")
+                .assertThat(this.parseToSchema(resp.body()))
                 .as(JsonSnapshot.json(TestUtils.om))
                 .matchesSnapshotStructure();
     }

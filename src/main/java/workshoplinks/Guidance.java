@@ -13,8 +13,11 @@ public enum Guidance {
     // # Gameplan!
     //
     // 1. Generate interesting test data to be able to work on finding the bottleneck easier!
+    //    Via Instancio!
     // 2. Do some manner of benchmarking to identify where the bottleneck is!
+    //    Via "Millibenchmarking"!
     // 3. Verify your fix!
+    //    Via Snapshot testing!
 
     // 1. Generating test data
     InstancioInANutshell,
@@ -33,9 +36,6 @@ public enum Guidance {
     DemoSnapshotTestDevLoop4,
 
     // Extra credit
-
-    // Maybe if we cached the slow reflection-based annotation check, we could speed things up?
-    ExtraCreditCouldWeCacheTheAnnotationCheck,
 
     // Maybe if we switched the serializer library we could get even better performance?
     ExtraCreditCouldWeUseAMoreOptimizedSerializer,

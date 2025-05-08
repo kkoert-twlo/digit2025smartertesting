@@ -70,7 +70,7 @@ public class Application {
                 return handleOperationalData(operationalData); // local processing
             } catch (Exception e) {
                 log.error("Error processing data", e);
-                return null;
+                throw e;
             }
         }
 
@@ -80,7 +80,10 @@ public class Application {
             /// [Solutions#ExtraCreditCouldWeUseAMoreOptimizedSerializer]
             final var body = BodyPublishers.ofString(jsonMapper.writeValueAsString(analyticsData));
             final var request = analyticsServiceRequestBuilder.POST(body).build();
-            analyticsServiceClient.send(request, HttpResponse.BodyHandlers.discarding());
+            final var response = analyticsServiceClient.send(request, HttpResponse.BodyHandlers.discarding());
+            if (response.statusCode() != 200) {
+                log.error("Error processing analytics data");
+            }
         }
 
         private Schema handleOperationalData(final Schema operationalData) {

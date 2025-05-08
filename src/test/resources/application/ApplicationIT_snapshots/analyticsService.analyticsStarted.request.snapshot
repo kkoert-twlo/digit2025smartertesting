@@ -1,5 +1,5 @@
 dynamic-directory: false
-snapshot-name: analyticsService.analyticsStarted
+snapshot-name: analyticsService.analyticsStarted.request
 snapshot-number: 0
 test-class: application.ApplicationIT
 test-method: snapshotTest

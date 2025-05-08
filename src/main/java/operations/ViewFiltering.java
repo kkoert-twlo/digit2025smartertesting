@@ -26,8 +26,6 @@ public class ViewFiltering {
         for (final Field nextField : originalInstance.getClass().getDeclaredFields()) {
             nextField.setAccessible(true);
 
-            /// [Guidance#ExtraCreditCouldWeCacheTheAnnotationCheck]
-            /// [Solutions#ExtraCreditCouldWeCacheTheAnnotationChecking]
             if (!nextField.isAnnotationPresent(viewAnnotation)) {
                 continue;
             }
